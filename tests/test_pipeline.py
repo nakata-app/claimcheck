@@ -68,6 +68,11 @@ class _StubGuard:
             ]
         )
 
+    def check_stream(self, chunks, question=None):
+        # Yield one claim per chunk so the test can count.
+        for chunk in chunks:
+            yield _StubClaim(chunk, supported=True)
+
 
 def _install_stubs():
     sys.modules["adaptmem"] = types.SimpleNamespace(AdaptMem=_StubAdaptMem)
@@ -126,3 +131,24 @@ def test_pipeline_save_then_load_round_trip(tmp_path: Path):
     p.save(tmp_path / "model")
     p2 = Pipeline.load(tmp_path / "model", enable_nli=False)
     assert p2._adaptmem.trained is True
+
+
+def test_pipeline_check_stream_yields_claims_per_chunk():
+    p = Pipeline.from_corpus(["doc1"], [{"query": "q", "relevant_ids": ["doc0"]}], train=True)
+    chunks = ["sentence one. ", "sentence two."]
+    claims = list(p.check_stream(chunks, question="q"))
+    assert len(claims) == 2
+    assert claims[0].text == "sentence one. "
+    assert claims[1].text == "sentence two."
+
+
+def test_pipeline_check_profile_flag_populates_timing():
+    p = Pipeline.from_corpus(["doc1"], [{"query": "q", "relevant_ids": ["doc0"]}], train=True)
+    v_off = p.check("answer", question="q")
+    assert v_off.timing is None
+
+    v_on = p.check("answer", question="q", profile=True)
+    assert v_on.timing is not None
+    assert v_on.timing["n_claims"] == 2.0
+    assert v_on.timing["total_ms"] >= 0.0
+    assert v_on.timing["ms_per_claim"] >= 0.0
