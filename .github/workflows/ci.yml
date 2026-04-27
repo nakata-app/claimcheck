@@ -35,7 +35,10 @@ jobs:
           pip install -e ./_siblings/adaptmem
           pip install -e ./_siblings/halluguard
           pip install -e ".[dev]"
+          pip install mypy
       - name: Lint
         run: ruff check claimcheck tests
+      - name: Type-check (mypy --strict)
+        run: mypy --strict claimcheck
       - name: Test
         run: pytest -q
