@@ -46,9 +46,45 @@ But the most common deployment shape pairs them — domain-tuned retrieval for t
 - **Not a vector database.** Bring your own; `claimcheck` is the *encoder + verifier* layer.
 - **Not a replacement for either sibling.** If you only need adaptmem (no verification) or only halluguard (with a generic encoder), use them directly.
 
+## How it compares to LLM-as-judge tools
+
+The closest commercial / open-source category is "LLM-as-judge" — a separate large-model call grades each claim. Claimcheck is the **no-LLM-judge** branch: a deterministic NLI cross-encoder + retrieval-augmented gate. The tradeoffs are real and shape what you should use it for.
+
+| Feature | claimcheck | LLM-as-judge<br/>(Patronus, Galileo, CleanLab, Guardrails) |
+|---|---|---|
+| Judge model | NLI cross-encoder (≈90M params, local) | LLM call (GPT-4 / Claude / open-source 7-70B) |
+| Cost per claim | $0 (local CPU/GPU) | $0.001-0.05 (API token cost) |
+| Latency per claim (CPU) | 50-200ms | 500-3000ms (network + LLM inference) |
+| Determinism | yes — same input → same score | partial — depends on model temperature, version, drift |
+| Vendor lock-in | none | judge model API, often a single provider |
+| Audit trail | claim → cited chunk → entail/contradict score | claim → judge prompt + judge response (opaque reasoning) |
+| Domain tuning | yes — retriever fine-tuned on your corpus (adaptmem) | usually no — judge is generic |
+| Customising the judge | swap any HuggingFace cross-encoder | retrain or fine-tune the LLM (rarely practical) |
+| Streaming | yes — sentence-by-sentence verdict (`check_stream`) | yes for some, but each judge call is heavier |
+| Privacy | data stays local | claims and context sent to judge provider |
+| Best at | budget-bound CI/middleware, per-domain accuracy, audit | general-purpose judgement, "did the model do something obviously bad" |
+
+**When claimcheck wins:**
+- High-throughput middleware where per-claim cost matters (every chatbot turn checked).
+- Privacy-bound deployments (medical, legal, internal tools) where claims can't leave the perimeter.
+- Domain-specific RAG where a tuned retriever beats a generic LLM judge that doesn't know your jargon.
+- Streaming UX where users see the verdict as the LLM types.
+
+**When LLM-as-judge wins:**
+- Open-ended quality assessment ("is this answer helpful, safe, polite?") that isn't really a hallucination check.
+- Few-shot domains with no labelled training queries to fine-tune the retriever.
+- One-off audits where a $0.05 model call is cheaper than building infrastructure.
+
+The two are **complementary**, not exclusive. A reasonable production stack runs claimcheck in-line on every response (cheap, deterministic, blocks the worst), and an LLM judge in a sampled audit (expensive, broader, catches subtler issues).
+
 ## Status
 
-`v0.1` skeleton. Public API decided, integration tests landing next. The two siblings (`adaptmem` v0.4-shipped, `halluguard` v0.2-ext) are mature enough to compose; this repo just wires them.
+`v0.1.1` shipped. Public API decided (`Pipeline.from_corpus`, `check`, `check_stream`, `check(profile=True)`, `save/load`), 6 unit tests passing, mypy --strict clean, CI matrix on 3.10/3.11/3.12. The two siblings (`adaptmem` v0.4-shipped, `halluguard` v0.2-ext-shipped) are mature enough to compose; this repo just wires them.
+
+Pre-PyPI: install via local editable until siblings publish.
+```bash
+pip install -e ../adaptmem ../halluguard ../claimcheck
+```
 
 ## License
 
