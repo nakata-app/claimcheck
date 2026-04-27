@@ -79,9 +79,8 @@ class Pipeline:
             am._model = SentenceTransformer(base_model, device=device) if device else SentenceTransformer(base_model)
             from adaptmem.miner import CorpusEntry
             am._corpus = [CorpusEntry(id=f"doc{i}", text=d) for i, d in enumerate(documents)]
-            import numpy as np
             am._embeddings = am._model.encode(
-                [d for d in documents],
+                list(documents),
                 normalize_embeddings=True,
                 convert_to_numpy=True,
                 show_progress_bar=False,

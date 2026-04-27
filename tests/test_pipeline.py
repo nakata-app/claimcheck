@@ -94,7 +94,7 @@ from claimcheck import Pipeline, Verdict  # noqa: E402
 def test_pipeline_train_path_invokes_adaptmem_train():
     docs = ["doc1", "doc2"]
     labelled = [{"query": "q1", "relevant_ids": ["doc0"]}]
-    p = Pipeline.from_corpus(docs, labelled, train=True, enable_nli=False)
+    Pipeline.from_corpus(docs, labelled, train=True, enable_nli=False)
     am = _StubAdaptMem.instances[-1]
     assert am.trained is True
     assert am.labelled_arg == labelled
