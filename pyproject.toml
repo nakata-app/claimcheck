@@ -16,10 +16,10 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 
-# adaptmem and halluguard are sibling packages. While both are pre-PyPI we
-# rely on local editable installs (`pip install -e ../adaptmem ../halluguard`).
-# Once they're published, list them here as proper dependencies.
-dependencies = []
+dependencies = [
+  "adaptmem>=0.5.1",
+  "halluguard>=0.3.1",
+]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "pytest-cov>=5.0", "ruff>=0.5"]

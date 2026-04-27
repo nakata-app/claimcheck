@@ -1,8 +1,13 @@
 # claimcheck
 
+[![PyPI version](https://img.shields.io/pypi/v/claimcheck.svg)](https://pypi.org/project/claimcheck/)
+[![Python versions](https://img.shields.io/pypi/pyversions/claimcheck.svg)](https://pypi.org/project/claimcheck/)
+[![License: MIT](https://img.shields.io/pypi/l/claimcheck.svg)](LICENSE)
+[![CI](https://github.com/nakata-app/claimcheck/actions/workflows/ci.yml/badge.svg)](https://github.com/nakata-app/claimcheck/actions/workflows/ci.yml)
+
 **Domain-tuned retrieval + zero-LLM claim verification, in one pipeline.**
 
-`claimcheck` glues two siblings — [`adaptmem`](../adaptmem) (domain-adapted bi-encoder retrieval) and [`halluguard`](../halluguard) (reverse-RAG hallucination detection) — into a single API:
+`claimcheck` glues two siblings — [`adaptmem`](https://github.com/nakata-app/adaptmem) (domain-adapted bi-encoder retrieval) and [`halluguard`](https://github.com/nakata-app/halluguard) (reverse-RAG hallucination detection) — into a single API:
 
 ```python
 from claimcheck import Pipeline
@@ -105,11 +110,18 @@ The two are **complementary**, not exclusive. A reasonable production stack runs
 
 ## Status
 
-`v0.1.1` shipped. Public API decided (`Pipeline.from_corpus`, `check`, `check_stream`, `check(profile=True)`, `save/load`), 6 unit tests passing, mypy --strict clean, CI matrix on 3.10/3.11/3.12. The two siblings (`adaptmem` v0.4-shipped, `halluguard` v0.2-ext-shipped) are mature enough to compose; this repo just wires them.
+`v0.1.0` shipped on PyPI (April 2026). Public API decided (`Pipeline.from_corpus`, `from_daemon`, `check`, `check_stream`, `check(profile=True)`, `save/load`), 8 unit tests passing, mypy --strict clean, CI matrix on Python 3.10 / 3.11 / 3.12. The two siblings (`adaptmem` v0.5.1, `halluguard` v0.3.1) are mature enough to compose; this repo just wires them.
 
-Pre-PyPI: install via local editable until siblings publish.
 ```bash
-pip install -e ../adaptmem ../halluguard ../claimcheck
+pip install claimcheck   # pulls adaptmem + halluguard automatically
+```
+
+For daemon mode (one model load shared across processes):
+
+```bash
+pip install "adaptmem[server]" claimcheck
+adaptmem serve --port 7800 &
+# then use Pipeline.from_daemon(...)
 ```
 
 ## License

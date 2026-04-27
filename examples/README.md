@@ -14,7 +14,10 @@ self-contained — no external services, no API keys.
 ## Prerequisites
 
 ```bash
-# From the claimcheck repo root:
+# From PyPI (siblings come along automatically):
+pip install claimcheck
+
+# Or, for local development across all three repos:
 pip install -e ../adaptmem ../halluguard -e .
 ```
 

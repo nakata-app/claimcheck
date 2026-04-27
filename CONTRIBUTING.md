@@ -13,9 +13,15 @@ in a sibling.
 git clone https://github.com/nakata-app/claimcheck.git
 cd claimcheck
 python -m venv .venv && source .venv/bin/activate
-# claimcheck is pre-PyPI; siblings need to be local editable installs.
-pip install -e ../adaptmem ../halluguard -e ".[dev]"
+# Siblings (adaptmem, halluguard) come from PyPI as regular dependencies.
+pip install -e ".[dev]"
 pre-commit install
+```
+
+For local sibling development (editing adaptmem or halluguard side-by-side):
+
+```bash
+pip install -e ../adaptmem ../halluguard -e ".[dev]"
 ```
 
 ## What we run before every commit
