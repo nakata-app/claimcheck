@@ -11,6 +11,7 @@ self-contained — no external services, no API keys.
 | `langchain_integration.py` | LangChain `RunnableLambda` post-step that verifies any chain's output | `langchain-core` |
 | `llamaindex_integration.py` | LlamaIndex query-engine wrapper that verifies every `.query()` response | `llama-index-core` (demo uses a fake engine to skip API costs) |
 | `daemon_integration.py` | `Pipeline.from_daemon` — encoder lives in a long-lived `adaptmem serve` process | `adaptmem[server]`, `requests`, daemon running |
+| `slack_bot.py` | Slash command (`/factcheck`) + @mention handler — verify any teammate-posted claim against your team's docs | `slack_bolt`, Slack tokens |
 
 ## Prerequisites
 
