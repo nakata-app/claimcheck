@@ -10,6 +10,8 @@ import sys
 import types
 from pathlib import Path
 
+import pytest
+
 
 # ---- Shim: stub adaptmem + halluguard before claimcheck imports them ------
 class _StubAdaptMem:
@@ -140,6 +142,44 @@ def test_pipeline_check_stream_yields_claims_per_chunk():
     assert len(claims) == 2
     assert claims[0].text == "sentence one. "
     assert claims[1].text == "sentence two."
+
+
+def test_pipeline_from_daemon_delegates_to_guard_factory(monkeypatch):
+    """`Pipeline.from_daemon` should call `Guard.from_daemon` and skip AdaptMem."""
+    captured: dict = {}
+
+    def fake_guard_from_daemon(documents, daemon_url, **kwargs):
+        captured["documents"] = documents
+        captured["daemon_url"] = daemon_url
+        captured["kwargs"] = kwargs
+        g = _StubGuard()
+        g.kwargs = kwargs
+        return g
+
+    # Patch the Guard symbol that Pipeline.from_daemon reaches for.
+    import sys
+    sys.modules["halluguard"].Guard.from_daemon = staticmethod(fake_guard_from_daemon)
+
+    try:
+        p = Pipeline.from_daemon(
+            ["doc1", "doc2"],
+            daemon_url="http://example.invalid:7800",
+            threshold=0.42,
+        )
+        assert captured["documents"] == ["doc1", "doc2"]
+        assert captured["daemon_url"] == "http://example.invalid:7800"
+        assert captured["kwargs"]["threshold"] == 0.42
+        # Daemon path leaves _adaptmem as None.
+        assert p._adaptmem is None
+    finally:
+        # Don't leak the stub into other tests.
+        del sys.modules["halluguard"].Guard.from_daemon
+
+
+def test_pipeline_save_raises_when_no_adaptmem():
+    p = Pipeline(adaptmem=None, guard=_StubGuard())
+    with pytest.raises(RuntimeError, match="Daemon-backed"):
+        p.save("/tmp/should_not_be_written")
 
 
 def test_pipeline_check_profile_flag_populates_timing():

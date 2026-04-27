@@ -167,6 +167,12 @@ class Pipeline:
 
     def save(self, path: str | Path) -> None:
         """Persist the trained pipeline to disk. Reloadable via Pipeline.load()."""
+        if self._adaptmem is None:
+            raise RuntimeError(
+                "Pipeline.save() is only supported for in-process pipelines "
+                "(Pipeline.from_corpus). Daemon-backed pipelines have nothing "
+                "to persist locally — the encoder lives in the daemon."
+            )
         self._adaptmem.save(path)
 
     @classmethod
@@ -193,3 +199,52 @@ class Pipeline:
             min_entail_votes=min_entail_votes,
         )
         return cls(adaptmem=am, guard=guard)
+
+    @classmethod
+    def from_daemon(
+        cls,
+        documents: list[str],
+        daemon_url: str = "http://127.0.0.1:7800",
+        *,
+        timeout_s: float = 10.0,
+        enable_nli: bool = True,
+        threshold: float = 0.55,
+        entail_threshold: float = 0.5,
+        min_entail_votes: int = 1,
+        chunk_size: int = 200,
+        chunk_overlap: int = 50,
+    ) -> "Pipeline":
+        """Build a Pipeline whose encoder is an `adaptmem serve` daemon.
+
+        Same surface as `from_corpus(..., train=False)`, but the
+        SentenceTransformer load happens once inside the daemon —
+        across many Pipeline instances if you want. Saves the per-
+        process model load cost.
+
+        Trade-off: every retrieval pays one HTTP round-trip to the
+        daemon for query encoding. On localhost this is ~1ms; for
+        latency-sensitive paths, prefer `from_corpus(...)` which keeps
+        the encoder in the same process.
+
+        NLI verifier (the slow part) stays local because cross-encoder
+        rerank batches don't fit the daemon's `/embed` shape.
+        """
+        from halluguard import Guard
+        from halluguard.verifier import NLIVerifier
+
+        verifier = NLIVerifier() if enable_nli else None
+        guard = Guard.from_daemon(
+            documents,
+            daemon_url=daemon_url,
+            timeout_s=timeout_s,
+            threshold=threshold,
+            verifier=verifier,
+            entail_threshold=entail_threshold,
+            min_entail_votes=min_entail_votes,
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+        )
+        # The retriever side carries everything we need; AdaptMem is only
+        # needed when the caller wants `pipeline.train()` later, which the
+        # daemon path doesn't support today.
+        return cls(adaptmem=None, guard=guard)
