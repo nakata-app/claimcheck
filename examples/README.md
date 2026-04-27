@@ -9,6 +9,7 @@ self-contained — no external services, no API keys.
 | `streaming.py` | `check_stream` — flag a hallucinated sentence the moment it lands | none |
 | `middleware.py` | Production gate pattern — block / warn / pass on `trust_score`, with `profile=True` timing | none |
 | `langchain_integration.py` | LangChain `RunnableLambda` post-step that verifies any chain's output | `langchain-core` |
+| `daemon_integration.py` | `Pipeline.from_daemon` — encoder lives in a long-lived `adaptmem serve` process | `adaptmem[server]`, `requests`, daemon running |
 
 ## Prerequisites
 
