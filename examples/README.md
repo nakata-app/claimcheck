@@ -14,6 +14,7 @@ self-contained — no external services, no API keys.
 | `slack_bot.py` | Slash command (`/factcheck`) + @mention handler — verify any teammate-posted claim against your team's docs | `slack_bolt`, Slack tokens |
 | `ecommerce_product_rag.py` | Customer asks → LLM answers → claimcheck guards against invented SKUs / prices / attributes | none |
 | `discord_bot.py` | `/factcheck` slash command — verify a claim against the server's documented rules | `discord.py>=2.4`, bot token |
+| `server_fastapi.py` | Run claimcheck as an HTTP service — `/healthz`, `/readyz`, `POST /verify` | `fastapi`, `uvicorn` |
 
 ## Prerequisites
 
