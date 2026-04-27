@@ -25,7 +25,7 @@ v0.1.1 polish           ████████████  done   (CHANGELOG,
                                               release.yml, pre-commit, .gitignore)
 v0.1.2 surface           ████████████  done   (--profile flag, check_stream, mypy
                                               --strict, comparison table, 4 examples,
-                                              timing bench)
+                                              timing bench, Pipeline.from_daemon)
 v0.2 multi-bench         ░░░░░░░░░░░░  0%     (LongMemEval/HaluEval paired runs —
                                               halluguard already ablated encoder swap,
                                               null result; pair-bench would re-confirm)
@@ -71,6 +71,14 @@ for claim in pipeline.check_stream(token_iter, question="..."):
 # 4. Persistence
 pipeline.save("./model")
 pipeline2 = Pipeline.load("./model", enable_nli=True)
+
+# 5. Daemon-backed (one model load shared across processes)
+# Prerequisite: `pip install "adaptmem[server]" && adaptmem serve`
+pipeline = Pipeline.from_daemon(
+    documents=[...],
+    daemon_url="http://127.0.0.1:7800",
+    enable_nli=True,
+)
 ```
 
 ## Examples (runnable)
@@ -104,5 +112,5 @@ pipeline2 = Pipeline.load("./model", enable_nli=True)
 - Same shared venv as adaptmem + halluguard:
   `~/Projects/metis-pair/benchmarks/.venv`.
 - Tests: `cd ~/Projects/claimcheck && ../metis-pair/benchmarks/.venv/bin/pytest -q`
-- Current suite: **6/6 pass**, lint clean, mypy --strict clean.
+- Current suite: **8/8 pass**, lint clean, mypy --strict clean.
 - Timing bench: `python benchmarks/timing_bench.py --n 30 --out benchmarks/results_timing.json`
