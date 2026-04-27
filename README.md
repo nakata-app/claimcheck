@@ -4,6 +4,7 @@
 [![Python versions](https://img.shields.io/pypi/pyversions/claimcheck.svg)](https://pypi.org/project/claimcheck/)
 [![License: MIT](https://img.shields.io/pypi/l/claimcheck.svg)](LICENSE)
 [![CI](https://github.com/nakata-app/claimcheck/actions/workflows/ci.yml/badge.svg)](https://github.com/nakata-app/claimcheck/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/nakata-app/claimcheck/graph/badge.svg)](https://codecov.io/gh/nakata-app/claimcheck)
 
 **Domain-tuned retrieval + zero-LLM claim verification, in one pipeline.**
 
