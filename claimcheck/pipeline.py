@@ -77,10 +77,11 @@ class Pipeline:
         else:
             # No-train path: encode the corpus with the base model directly.
             from sentence_transformers import SentenceTransformer
-            am._model = SentenceTransformer(base_model, device=device) if device else SentenceTransformer(base_model)
+            model = SentenceTransformer(base_model, device=device) if device else SentenceTransformer(base_model)
+            am._model = model
             from adaptmem.miner import CorpusEntry
             am._corpus = [CorpusEntry(id=f"doc{i}", text=d) for i, d in enumerate(documents)]
-            am._embeddings = am._model.encode(
+            am._embeddings = model.encode(
                 list(documents),
                 normalize_embeddings=True,
                 convert_to_numpy=True,
