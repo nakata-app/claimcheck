@@ -46,6 +46,32 @@ But the most common deployment shape pairs them — domain-tuned retrieval for t
 - **Not a vector database.** Bring your own; `claimcheck` is the *encoder + verifier* layer.
 - **Not a replacement for either sibling.** If you only need adaptmem (no verification) or only halluguard (with a generic encoder), use them directly.
 
+## Daemon mode (`Pipeline.from_daemon`)
+
+For deployments where you'd rather not load a SentenceTransformer in
+every Python process (claimcheck + halluguard + a third service each
+paying the same model cost), point claimcheck at a long-lived
+[`adaptmem serve`](https://github.com/nakata-app/adaptmem#daemon-mode-adaptmem-serve)
+process:
+
+```python
+from claimcheck import Pipeline
+
+# Daemon must be running: `adaptmem serve --port 7800`
+pipeline = Pipeline.from_daemon(
+    documents=[...],
+    daemon_url="http://127.0.0.1:7800",
+    enable_nli=True,   # NLI verifier still runs in-process
+)
+verdict = pipeline.check("an answer", question="...")
+```
+
+The encoder hop crosses HTTP; cosine search and NLI verification stay
+local. `pipeline.save()` is not supported for daemon-backed pipelines
+(the model lives in the daemon). `Pipeline.from_daemon` calls
+`/healthz` first so a misconfigured URL fails loudly at construction
+time, not deep inside the first `.check()`.
+
 ## How it compares to LLM-as-judge tools
 
 The closest commercial / open-source category is "LLM-as-judge" — a separate large-model call grades each claim. Claimcheck is the **no-LLM-judge** branch: a deterministic NLI cross-encoder + retrieval-augmented gate. The tradeoffs are real and shape what you should use it for.
