@@ -50,7 +50,7 @@ class Pipeline:
     def from_corpus(
         cls,
         documents: list[str],
-        labelled_queries: list[dict] | None = None,
+        labelled_queries: list[dict[str, Any]] | None = None,
         *,
         train: bool = True,
         enable_nli: bool = True,
@@ -162,7 +162,8 @@ class Pipeline:
         Aggregate them yourself if you need a final response-level
         trust_score.
         """
-        return self._guard.check_stream(answer_chunks, question=question)
+        result: Iterator[Any] = self._guard.check_stream(answer_chunks, question=question)
+        return result
 
     def save(self, path: str | Path) -> None:
         """Persist the trained pipeline to disk. Reloadable via Pipeline.load()."""

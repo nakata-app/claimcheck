@@ -42,3 +42,11 @@ target-version = "py310"
 testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "-q"
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+
+[[tool.mypy.overrides]]
+module = ["adaptmem", "adaptmem.*", "halluguard", "halluguard.*", "sentence_transformers"]
+ignore_missing_imports = true
