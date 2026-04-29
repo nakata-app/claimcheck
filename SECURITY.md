@@ -4,7 +4,7 @@
 
 Please **do not** open a public GitHub issue for security-sensitive
 findings. Instead, email the maintainer at
-**ataknakbaba@gmail.com** with:
+**hey@nakata.app** with:
 
 - A description of the issue.
 - Steps to reproduce (a minimal repro is enough).
@@ -23,11 +23,11 @@ scripts, the timing bench, and `from_daemon` / `from_corpus` /
 
 Out of scope:
 - Issues that originate in `adaptmem` or `halluguard`. Report those
-  upstream — links in the README. We will help triage.
+  upstream, links in the README. We will help triage.
 - Bugs in third-party libraries (sentence-transformers, transformers,
   torch, fastapi, langchain). Report to the upstream project.
 
-## Threat model — daemon mode
+## Threat model, daemon mode
 
 `Pipeline.from_daemon(daemon_url=...)` delegates encoding to a
 long-lived `adaptmem serve` process. The daemon is **localhost-only,
